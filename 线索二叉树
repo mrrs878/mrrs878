@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum
+{
+    Link,
+    Tread
+}PointerTag;
+
+typedef char TElemType;
+
+typedef struct TreeNode
+{
+    TElemType data;  //数据单元
+
+    struct TreeNode *pLChild, *pRChild;  //左右孩子指针
+    PointerTag LTag, RTag;  //左右标志 ==0：孩子指针；==1：前后驱
+}TreeNode, Tree;
+
+TreeNode *gPre = NULL;
+
+/* 先序创建二叉树 */
+void CreateTree(Tree **_t)
+{
+    TElemType ch = -1;
+
+    scanf("%c", &ch);
+
+    if(ch == '#')
+        *_t = NULL;
+    else
+    {
+        *_t = (Tree*)malloc(sizeof(TreeNode));
+        if(*_t == NULL)
+            return;
+        (*_t)->data = ch;
+        (*_t)->LTag = Link;
+        (*_t)->RTag = Link;
+        CreateTree(&((*_t)->pLChild));
+        CreateTree(&((*_t)->pRChild));
+    }
+}
+
+/* 遍历二叉树 */
+int InOrderThraverse_Thr(Tree *_t)
+{
+    Tree *p =NULL;
+
+    p = _t->pLChild;
+    while(p != _t)
+    {
+        while(p->LTag == Link)
+            p = p->pLChild;
+
+        printf("%c ", p->data);    //对节点的操作
+
+        while((p->RTag == Tread) && (p->pRChild != _t))
+        {
+            p = p->pRChild;
+            
+            printf("%c ", p->data);
+        }
+        p = p->pRChild;
+    }
+
+    return 0;
+}
+
+void InOrderThreading(Tree *_p)
+{
+    if(_p)
+    {
+        InOrderThreading(_p->pLChild);    //左树线索初始化
+        if(!_p->pLChild)    //前驱线索
+        {
+            _p->LTag = Tread;
+            _p->pLChild = gPre;
+        }
+        if(!gPre->pRChild)  //后继线索
+        {
+            gPre->RTag = Tread;
+            gPre->pRChild = _p;
+        }
+        gPre = _p;
+
+        InOrderThreading(_p->pRChild);    //右子树线索初始化
+    }
+}
+
+/* 线索化二叉树 */
+int InOrderThread_Head(Tree **_h, Tree *_t)
+{
+    (*_h) = (TreeNode *)malloc(sizeof(TreeNode));
+    if(*_h == NULL)
+        return -1;
+    
+    (*_h)->pRChild = *_h;
+    (*_h)->RTag = Link;
+
+    if(!_t)
+    {
+        (*_h)->pLChild = *_h;
+        (*_h)->LTag = Link;
+    }
+    else
+    {
+        gPre = *_h;
+        (*_h)->LTag = Link;
+        (*_h)->pLChild = _t;
+        InOrderThreading(_t);
+        gPre->pRChild = *_h;
+        gPre->RTag = Tread;
+        (*_h)->pRChild = gPre;
+    }
+
+    return 0;
+}
+
+int main(void)
+{
+    Tree *t=NULL, *temp=NULL;
+
+    printf("请输入前序二叉树的内容：\n");
+    CreateTree(&t);
+    InOrderThread_Head(&temp, t);       //加入头结点，并线索化  
+    printf("输出中序二叉树的内容:\n");  
+    InOrderThraverse_Thr(temp);  
+                   
+    printf("\n");
+    return 0;
+}
