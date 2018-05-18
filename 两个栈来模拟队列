@@ -1,0 +1,50 @@
+#include "stack.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+int EnQueue(Stack *_push, int *_d)
+{
+	if(FullStack(_push) == 0)
+		return -1;
+
+	PushStack(_push, _d);
+}
+
+int DeQueue(Stack *_push, Stack *_pop, int *_d)
+{
+	int temp = 0;
+
+	if(EmptyStack(_pop) == 0)
+	{
+		while(EmptyStack(_push) == -1)
+		{
+			PopStack(_push, &temp);
+			PushStack(_pop, &temp);
+		}
+	}
+	PopStack(_pop, _d);
+}
+
+#if 1
+int main(void)
+{
+	Stack SPush;
+	Stack SPop;
+	int i=10, j=20, k=30, m=0, n=0;
+
+	InitStack(&SPush);
+	InitStack(&SPop);
+	
+	EnQueue(&SPush, &i);
+	EnQueue(&SPush, &j);
+	EnQueue(&SPush, &k);
+	
+	DeQueue(&SPush, &SPop, &k);
+	DeQueue(&SPush, &SPop, &j);
+	DeQueue(&SPush, &SPop, &i);
+
+	printf("%d  %d  %d\n", k, j, i);
+
+	exit(0);
+}
+#endif
